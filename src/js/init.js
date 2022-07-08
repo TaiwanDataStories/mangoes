@@ -111,8 +111,6 @@ const cluster = d3.cluster()
 
 const mangoData = cluster(root).leaves();
 // root.children seems to be the same thing, but only works if I have console.log(cluster(root).leaves())... b/c I need the x & y
-// console.log(cluster(root).leaves())
-// console.log(root.children)
 
 mangoData.forEach(function (d, i) {
     d.centerAngle = (d.x - centerAdjustment) * Math.PI / 180; //-centerAdjustment so it starts at the center at top...basically centerAngle is just x converted from 360 to radians
@@ -360,13 +358,7 @@ const drawSortedMangoes = (data) => {
             return "M" + xs + "," + ys + " A" + rad + "," + rad + " 0 0 1 " + xt + "," + yt;
         })
 
-    //if I add click on a mango so that it goes to the center, then click on sortBySize, then the last mango text doesn't draw,
-    // even though the data still shows 23 mangoes, the d.data.name for the mangoText only shows 22
 
-
-    // mangoNameG.selectAll(".mangoText textPath").remove().
-
-    //  currently only includes the update elements, not the enter elements
     mangoNameG.selectAll(".mangoText")
         .data(data)
         .join(
@@ -377,8 +369,6 @@ const drawSortedMangoes = (data) => {
                 .attr("class", "mangoText")
                 .select("textPath")
         )
-        // .attr("class", "mangoText") // still 23 items here
-        // .select("textPath") // becomes 22 items. why? because I need to append the last one, but not sure how to do it
         .attr("startOffset", "50%")
         .style("text-anchor", "middle")
         .style("font-weight", 400)
@@ -472,11 +462,8 @@ const rearrageMangoData = (data) => {
     // startAngle2: 0.1546996382449519
     // x: 72.97963350023863
     // y: -259.94994343944535
-
-
+    
     return [filteredData, filteredData.concat(selectedData)];
-
-
 }
 
 
