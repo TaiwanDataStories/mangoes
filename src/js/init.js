@@ -141,6 +141,19 @@ const calculatePath = (startAngle2,endAngle2) =>{
     return "M" + xs + "," + ys + " A" + rad + "," + rad + " 0 0 1 " + xt + "," + yt;
 }
 
+// function to append middle texts
+const appendText = (id) => {
+    
+    circleG.append("text")
+        .attr("class", "middleText")
+        .attr("text-anchor", "middle")
+        .attr("id", id)
+        .attr("x", 0)
+        .attr("fill", "#985B39")
+        .style("opacity", 0)
+        .text("");
+    
+}
 
 ////////////////////////////////////////////////////////////
 ////////////////// Clean & prepare data ////////////////////
@@ -189,7 +202,7 @@ circleG.selectAll("image.mango")
     .duration(1000)
     .attr("opacity", 1)
 
-//center text
+//add text in middle
 circleG.append("text")
     .attr("class", "middleText")
     .attr("text-anchor", "middle")
@@ -203,32 +216,9 @@ circleG.append("text")
     .attr("font-weight", 700)
     .text("");
 
-circleG.append("text")
-    .attr("class", "middleText")
-    .attr("text-anchor", "middle")
-    .attr("id", "text2")
-    .attr("x", 0)
-    .attr("fill", "#985B39")
-    .style("opacity", 0)
-    .text("");
-
-circleG.append("text")
-    .attr("class", "middleText")
-    .attr("text-anchor", "middle")
-    .attr("id", "text3")
-    .attr("x", 0)
-    .attr("fill", "#985B39")
-    .style("opacity", 0)
-    .text("");
-
-circleG.append("text")
-    .attr("class", "middleText")
-    .attr("text-anchor", "middle")
-    .attr("id", "text4")
-    .attr("x", 0)
-    .attr("fill", "#985B39")
-    .style("opacity", 0)
-    .text("");
+appendText("text2");
+appendText("text3");
+appendText("text4");
 
 //Label line, arc & text
 mangoNameG.append("line")
