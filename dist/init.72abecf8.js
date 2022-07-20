@@ -48150,7 +48150,7 @@ var circle_radius = screenSize == "medium" || screenSize == "small" ? width * 0.
 var arc_radius = screenSize == "medium" || screenSize == "small" ? width * 0.44 : width * 0.36;
 var label_radius = screenSize == "medium" || screenSize == "small" ? width * 0.48 : width * 0.4;
 var line_radius1 = screenSize == "medium" || screenSize == "small" ? width * 0.46 : width * 0.38;
-var line_radius2 = screenSize == "medium" || screenSize == "small" ? width * 0.5 : width * 0.43; //wrap text
+var line_radius2 = screenSize == "medium" || screenSize == "small" ? width * 0.5 : width * 0.43; //function to wrap text
 
 var wrap = function wrap(text, width) {
   text.each(function () {
@@ -48181,6 +48181,30 @@ var wrap = function wrap(text, width) {
       }
     }
   });
+}; // function to add attributes to nodes
+
+
+var addAttributes = function addAttributes(data) {
+  data.forEach(function (d, i) {
+    d.cluster = i;
+    d.startAngle = d.centerAngle - mango_angle_distance / 2;
+    d.endAngle = d.centerAngle + mango_angle_distance / 2;
+    d.startAngle2 = d.centerAngle - mango_angle_distance / 2 + mango_angle_distance / 12;
+    d.endAngle2 = d.centerAngle + mango_angle_distance / 2 - mango_angle_distance / 12;
+    d.x = circle_radius * Math.cos(data[d.cluster].centerAngle - PI05);
+    d.y = circle_radius * Math.sin(data[d.cluster].centerAngle - PI05);
+  });
+  return data;
+}; // function to calculate arc paths
+
+
+var calculatePath = function calculatePath(startAngle2, endAngle2) {
+  var rad = arc_radius,
+      xs = rad * Math.cos(startAngle2 - PI05),
+      ys = rad * Math.sin(startAngle2 - PI05),
+      xt = rad * Math.cos(endAngle2 - PI05),
+      yt = rad * Math.sin(endAngle2 - PI05);
+  return "M" + xs + "," + ys + " A" + rad + "," + rad + " 0 0 1 " + xt + "," + yt;
 }; //DATA CLEANING
 
 
@@ -48189,27 +48213,16 @@ var root = d3.stratify().id(function (d) {
 }).parentId(function (d) {
   return d.parent;
 })(_mangoesData.mangoes);
-var cluster = d3.cluster().size([360, null]); // the second var doesn't seem to matter
-
-var mangoData = cluster(root).leaves(); // root.children seems to be the same thing, but only works if I have console.log(cluster(root).leaves())... b/c I need the x & y
-// console.log(cluster(root).leaves())
-// console.log(root.children)
-
+var cluster = d3.cluster().size([360, null]);
+var mangoData = cluster(root).leaves();
 mangoData.forEach(function (d, i) {
   d.centerAngle = (d.x - centerAdjustment) * Math.PI / 180; //-centerAdjustment so it starts at the center at top...basically centerAngle is just x converted from 360 to radians
 });
-var mango_angle_distance = mangoData[1].centerAngle - mangoData[0].centerAngle;
-mangoData.forEach(function (d, i) {
-  d.startAngle = d.centerAngle - mango_angle_distance / 2;
-  d.endAngle = d.centerAngle + mango_angle_distance / 2;
-  d.startAngle2 = d.centerAngle - mango_angle_distance / 2 + mango_angle_distance / 12;
-  d.endAngle2 = d.centerAngle + mango_angle_distance / 2 - mango_angle_distance / 12;
-  d.cluster = i;
-  d.x = circle_radius * Math.cos(mangoData[d.cluster].centerAngle - PI05);
-  d.y = circle_radius * Math.sin(mangoData[d.cluster].centerAngle - PI05);
-}); //forEach
+var mango_angle_distance = mangoData[1].centerAngle - mangoData[0].centerAngle; // for 23 mangoes
 
-var circles = circleG.selectAll("image.mango").data(mangoData).join("svg:image").attr("class", "mango").attr("x", function (d) {
+mangoData = addAttributes(mangoData); // join the mango images
+
+circleG.selectAll("image.mango").data(mangoData).join("svg:image").attr("class", "mango").attr("x", function (d) {
   return d.x - imgWidth / 2;
 }).attr("y", function (d) {
   return d.y - imgWidth / 2;
@@ -48229,7 +48242,7 @@ circleG.append("text").attr("class", "middleText").attr("text-anchor", "middle")
 }).attr("font-weight", 700).text("");
 circleG.append("text").attr("class", "middleText").attr("text-anchor", "middle").attr("id", "text2").attr("x", 0).attr("fill", "#985B39").style("opacity", 0).text("");
 circleG.append("text").attr("class", "middleText").attr("text-anchor", "middle").attr("id", "text3").attr("x", 0).attr("fill", "#985B39").style("opacity", 0).text("");
-circleG.append("text").attr("class", "middleText").attr("text-anchor", "middle").attr("id", "text4").attr("x", 0).attr("fill", "#985B39").style("opacity", 0).text(""); //Label
+circleG.append("text").attr("class", "middleText").attr("text-anchor", "middle").attr("id", "text4").attr("x", 0).attr("fill", "#985B39").style("opacity", 0).text(""); //Label line, arc & text
 
 mangoNameG.append("line").attr("class", "labelLine").attr("x1", line_radius1 * Math.cos(centerAdjustment * Math.PI / 180 - mango_angle_distance / 2 - PI05)).attr("y1", line_radius1 * Math.sin(centerAdjustment * Math.PI / 180 - mango_angle_distance / 2 - PI05)).attr("x2", line_radius2 * Math.cos(centerAdjustment * Math.PI / 180 - mango_angle_distance / 2 - PI05)).attr("y2", line_radius2 * Math.sin(centerAdjustment * Math.PI / 180 - mango_angle_distance / 2 - PI05)).style("stroke-width", "1px").attr("stroke", "#985B39");
 mangoNameG.append("path").attr("class", "labelArc").attr("id", "labelArc").style("stroke-width", "0px").style("fill", "none").attr("d", function (d, i) {
@@ -48248,13 +48261,8 @@ mangoNameG.append("text").attr("class", "labelText").append("textPath").attr("st
 
 mangoNameG.selectAll(".mangoArc").data(mangoData).join("path").attr("class", "mangoArc").attr("id", function (d, i) {
   return "mango_".concat(i);
-}).style("stroke", "#c4c4c4").style("stroke-width", "1px").style("fill", "none").attr("d", function (d, i) {
-  var rad = arc_radius,
-      xs = rad * Math.cos(d.startAngle2 - PI05),
-      ys = rad * Math.sin(d.startAngle2 - PI05),
-      xt = rad * Math.cos(d.endAngle2 - PI05),
-      yt = rad * Math.sin(d.endAngle2 - PI05);
-  return "M" + xs + "," + ys + " A" + rad + "," + rad + " 0 0 1 " + xt + "," + yt;
+}).style("stroke", "#c4c4c4").style("stroke-width", "1px").style("fill", "none").attr("d", function (d) {
+  return calculatePath(d.startAngle2, d.endAngle2);
 });
 mangoNameG.selectAll(".mangoText").data(mangoData).join("text").attr("class", "mangoText").append("textPath").attr("startOffset", "50%").style("text-anchor", "middle").style("font-size", function () {
   if (screenSize === "medium") return 12;
@@ -48266,49 +48274,31 @@ mangoNameG.selectAll(".mangoText").data(mangoData).join("text").attr("class", "m
   return d.data.name_en;
 });
 
-var sortMangoByAttribute = function sortMangoByAttribute(attribute) {
-  var sortedByAttr = root.sort(function (a, b) {
-    return d3.ascending(a.data[attribute], b.data[attribute]);
+var sortMangoByAttribute = function sortMangoByAttribute() {
+  var sortedByAttr; //sort root baed on attribute
+
+  if (mode === 'size') {
+    sortedByAttr = root.sort(function (a, b) {
+      return d3.ascending(a.data.size_cm, b.data.size_cm);
+    });
+  } else {
+    sortedByAttr = root.sort(function (a, b) {
+      return d3.ascending(a.data.sweetness_brix, b.data.sweetness_brix);
+    });
+  }
+
+  var mangoDataSorted = cluster(sortedByAttr).leaves();
+  mangoDataSorted.forEach(function (d, i) {
+    d.centerAngle = (d.x - centerAdjustment) * Math.PI / 180;
   });
-  var mangoDataAttr = cluster(sortedByAttr).leaves();
-  mangoDataAttr.forEach(function (d, i) {
-    d.cluster = i;
-    d.centerAngle = (d.x - centerAdjustment) * Math.PI / 180; //basically centerAngle is just x converted from 360 to radians
-
-    d.startAngle = d.centerAngle - mango_angle_distance / 2;
-    d.endAngle = d.centerAngle + mango_angle_distance / 2;
-    d.startAngle2 = d.centerAngle - mango_angle_distance / 2 + mango_angle_distance / 12;
-    d.endAngle2 = d.centerAngle + mango_angle_distance / 2 - mango_angle_distance / 12;
-    d.x = circle_radius * Math.cos(mangoDataAttr[d.cluster].centerAngle - PI05);
-    d.y = circle_radius * Math.sin(mangoDataAttr[d.cluster].centerAngle - PI05);
-  }); //forEach
-
-  return mangoDataAttr;
+  return addAttributes(mangoDataSorted);
 };
 
-(0, _jquery.default)('#size').on('click', function () {
-  var mangoDataSize = sortMangoByAttribute("size_cm");
-  mode = 'size';
-  (0, _jquery.default)("#size").addClass("active");
-  (0, _jquery.default)("#sweetness").removeClass("active");
-  drawSortedMangoes(mangoDataSize);
-});
-(0, _jquery.default)('#sweetness').on('click', function () {
-  var mangoDataSweetness = sortMangoByAttribute("sweetness_brix");
-  mode = 'sweet';
-  (0, _jquery.default)("#sweetness").addClass("active");
-  (0, _jquery.default)("#size").removeClass("active");
-  drawSortedMangoes(mangoDataSweetness);
-});
-
 var drawSortedMangoes = function drawSortedMangoes(data) {
-  circleG.select("#text1").transition().duration(500).text("");
-  circleG.select("#text2").transition().duration(500).text("");
-  circleG.select("#text3").transition().duration(500).text("");
-  circleG.select("#text4").transition().duration(500).text("");
+  circleG.selectAll("#text1,#text2,#text3,#text4").transition().duration(500).text("");
   d3.selectAll("image.mango").data(data, function (d) {
     return d.id;
-  }).join("svg:image").attr("class", "mango").transition().delay(function (d, i) {
+  }).join("image").attr("class", "mango").transition().delay(function (d, i) {
     return 50 * i;
   }).duration(1000).attr("x", function (d) {
     return d.x - imgWidth / 2;
@@ -48316,31 +48306,21 @@ var drawSortedMangoes = function drawSortedMangoes(data) {
     return d.y - imgWidth / 2;
   }).attr("width", imgWidth).attr("height", imgWidth).attr("xlink:href", function (d) {
     return "".concat(_.default[d.data.name]);
-  }); //if I add click on a mango so that it goes to the center, then click on sortBySize, the last arc doesn't draw if I use d3.selectAll as opposed to mangoNameG.selectAll
-
-  mangoNameG.selectAll(".mangoArc").data(data).join("path").attr("class", "mangoArc").style("stroke", "#c4c4c4").style("stroke-width", "1px").style("fill", "none").attr("id", function (d, i) {
+  });
+  mangoNameG.selectAll(".mangoArc").data(data).join(function (enter) {
+    return enter.append("path").attr("class", "mangoArc").attr("class", "mangoArc").style("stroke", "#c4c4c4").style("stroke-width", "1px").style("fill", "none");
+  }).attr("id", function (d, i) {
     return "mango_".concat(i);
   }).transition().delay(function (d, i) {
     return 50 * i;
-  }).duration(1000).attr("d", function (d, i) {
-    var rad = arc_radius,
-        xs = rad * Math.cos(d.startAngle2 - PI05),
-        ys = rad * Math.sin(d.startAngle2 - PI05),
-        xt = rad * Math.cos(d.endAngle2 - PI05),
-        yt = rad * Math.sin(d.endAngle2 - PI05);
-    return "M" + xs + "," + ys + " A" + rad + "," + rad + " 0 0 1 " + xt + "," + yt;
-  }); //if I add click on a mango so that it goes to the center, then click on sortBySize, then the last mango text doesn't draw,
-  // even though the data still shows 23 mangoes, the d.data.name for the mangoText only shows 22
-  // mangoNameG.selectAll(".mangoText textPath").remove().
-  //  currently only includes the update elements, not the enter elements
-
+  }).duration(1000).attr("d", function (d) {
+    return calculatePath(d.startAngle2, d.endAngle2);
+  });
   mangoNameG.selectAll(".mangoText").data(data).join(function (enter) {
     return enter.append("text").attr("class", "mangoText").append("textPath");
   }, function (update) {
     return update.attr("class", "mangoText").select("textPath");
-  }) // .attr("class", "mangoText") // still 23 items here
-  // .select("textPath") // becomes 22 items. why? because I need to append the last one, but not sure how to do it
-  .attr("startOffset", "50%").style("text-anchor", "middle").style("font-weight", 400).style("font-size", function () {
+  }).attr("startOffset", "50%").style("text-anchor", "middle").style("font-weight", 400).style("font-size", function () {
     if (screenSize === "medium") return 12;
     if (screenSize === "small") return 7;
     return 14;
@@ -48361,8 +48341,7 @@ var rearrageMangoData = function rearrageMangoData(data) {
 
   var root2 = d3.stratify().id(function (d) {
     return d.name;
-  }) //any column that's unique
-  .parentId(function (d) {
+  }).parentId(function (d) {
     return d.parent;
   })(filtered_hierarchy);
   var rootSorted;
@@ -48378,18 +48357,14 @@ var rearrageMangoData = function rearrageMangoData(data) {
   } //this is to prevent redrawing, for example, if the current order is sort by size instead of sweetness,
   // when the user clicks on a mango it won't sort it by sweetness before moving the mango to the middle
   //before cluster,the children's includes the following attributes...
-  // data: {parent: 'All', name: '夏雪', name_en: 'XiaXue', month start: 6, month end: 7, …}
+  // data: {parent: 'All', name: '夏雪', name_en: 'XiaXue' ...}
   // depth: 1
   // height: 0
   // id: "夏雪"
 
 
-  cluster(rootSorted); //after cluster, the children's includes the following attributes...
-  // data: {parent: 'All', name: '夏雪', name_en: 'XiaXue', month start: 6, month end: 7, …}
-  // depth: 1
-  // height: 0
-  // id: "夏雪"
-  // parent: pd {data: {…}, height: 1, depth: 0, parent: null, id: 'All', …}
+  cluster(rootSorted); //after cluster, the children's also has parent, x & y
+  // parent: pd {data: {…}, height: 1, depth: 0, parent: null, id: 'All'...}
   // x: 8.181818181818182
   // y: 0
 
@@ -48405,28 +48380,14 @@ var rearrageMangoData = function rearrageMangoData(data) {
     d.cluster = 22;
   });
   filteredData.forEach(function (d, i) {
-    d.centerAngle = (d.x - centerAdjustment) * Math.PI / 180; //basically centerAngle is just x converted from 360 to radians
+    d.centerAngle = (d.x - centerAdjustment) * Math.PI / 180;
   });
   var mango_angle_distance = filteredData[1].centerAngle - filteredData[0].centerAngle;
-  filteredData.forEach(function (d, i) {
-    d.cluster = i;
-    d.startAngle = d.centerAngle - mango_angle_distance / 2;
-    d.endAngle = d.centerAngle + mango_angle_distance / 2;
-    d.startAngle2 = d.centerAngle - mango_angle_distance / 2 + mango_angle_distance / 12;
-    d.endAngle2 = d.centerAngle + mango_angle_distance / 2 - mango_angle_distance / 12;
-    d.x = circle_radius * Math.cos(filteredData[d.cluster].centerAngle - PI05);
-    d.y = circle_radius * Math.sin(filteredData[d.cluster].centerAngle - PI05);
-  }); //forEach
-  //after the above step, the children includes the following attributes:
+  filteredData = addAttributes(filteredData, mango_angle_distance); //after the above step, the children includes also the following attributes, with x and y updated:
   // centerAngle: 0.27369935997183803
   // cluster: 0
-  // data: {parent: 'All', name: '夏雪', name_en: 'XiaXue', month start: 6, month end: 7, …}
-  // depth: 1
   // endAngle: 0.4164990260441014
   // endAngle2: 0.39269908169872414
-  // height: 0
-  // id: "夏雪"
-  // parent: pd {data: {…}, height: 1, depth: 0, parent: null, id: 'All', …}
   // startAngle: 0.13089969389957468
   // startAngle2: 0.1546996382449519
   // x: 72.97963350023863
@@ -48436,15 +48397,12 @@ var rearrageMangoData = function rearrageMangoData(data) {
 };
 
 var mangoClicked = function mangoClicked(dataFiltered, data) {
-  //dataFiltered doesn't include the mango in the middle, so can use it for the labels
   var selected = data.filter(function (d) {
     return d.cluster === 22;
   });
-  console.log(selected);
   d3.selectAll("image.mango").data(data, function (d) {
     return d.id;
-  }) //d=>d.cluster
-  .join("svg:image").attr("class", "mango").transition().duration(1000).attr("x", function (d) {
+  }).join("svg:image").attr("class", "mango").transition().duration(1000).attr("x", function (d) {
     return d.cluster === 22 ? d.x - (imgWidth + imgIncrease) / 2 : d.x - imgWidth / 2;
   }).attr("y", function (d) {
     return d.cluster === 22 ? d.y - (imgWidth + imgIncrease) / 2 : d.y - imgWidth / 2;
@@ -48454,18 +48412,14 @@ var mangoClicked = function mangoClicked(dataFiltered, data) {
     return d.cluster === 22 ? imgWidth + imgIncrease : imgWidth;
   }).attr("xlink:href", function (d) {
     return "".concat(_.default[d.data.name]);
-  });
+  }); //dataFiltered doesn't include the mango in the middle, so can use it for the labels
+
   d3.selectAll(".mangoArc").data(dataFiltered).join("path").attr("class", "mangoArc").style("stroke", "#c4c4c4").style("stroke-width", "1px").style("fill", "none").attr("id", function (d, i) {
     return "mango_".concat(i);
   }).transition().delay(function (d, i) {
     return 20 * i;
-  }).duration(1000).attr("d", function (d, i) {
-    var rad = arc_radius,
-        xs = rad * Math.cos(d.startAngle2 - PI05),
-        ys = rad * Math.sin(d.startAngle2 - PI05),
-        xt = rad * Math.cos(d.endAngle2 - PI05),
-        yt = rad * Math.sin(d.endAngle2 - PI05);
-    return "M" + xs + "," + ys + " A" + rad + "," + rad + " 0 0 1 " + xt + "," + yt;
+  }).duration(1000).attr("d", function (d) {
+    return calculatePath(d.startAngle2, d.endAngle2);
   });
   d3.selectAll(".mangoText").data(dataFiltered).join("text").attr("class", "mangoText").select("textPath").attr("startOffset", "50%").style("text-anchor", "middle").style("font-weight", 400).transition().delay(function (d, i) {
     return 20 * i;
@@ -48473,7 +48427,8 @@ var mangoClicked = function mangoClicked(dataFiltered, data) {
     return "#mango_" + i;
   }).style("opacity", 1).text(function (d) {
     return d.data.name_en;
-  });
+  }); // Update the text in the middle
+
   circleG.select("#text1").datum(selected[0]).transition().duration(500).attr("x", function (d) {
     return d.x;
   }).attr("y", function (d) {
@@ -48515,6 +48470,21 @@ var mangoClicked = function mangoClicked(dataFiltered, data) {
     return d.data.feature_en;
   }).call(wrap, windowWidth <= 992 ? 150 : 250);
 };
+
+(0, _jquery.default)('#size').on('click', function () {
+  mode = 'size';
+  var mangoDataSize = sortMangoByAttribute();
+  (0, _jquery.default)("#size").addClass("active");
+  (0, _jquery.default)("#sweetness").removeClass("active");
+  drawSortedMangoes(mangoDataSize);
+});
+(0, _jquery.default)('#sweetness').on('click', function () {
+  mode = 'sweet';
+  var mangoDataSweetness = sortMangoByAttribute();
+  (0, _jquery.default)("#sweetness").addClass("active");
+  (0, _jquery.default)("#size").removeClass("active");
+  drawSortedMangoes(mangoDataSweetness);
+});
 },{"../data/mangoesData":"data/mangoesData.js","d3":"../node_modules/d3/src/index.js","jquery":"../node_modules/jquery/dist/jquery.js","../img/*.png":"img/*.png"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -48543,7 +48513,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52503" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62023" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
