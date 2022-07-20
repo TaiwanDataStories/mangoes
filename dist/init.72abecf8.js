@@ -48097,6 +48097,9 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
+////////////////////////////////////////////////////////////
+///////////////// Size & mobile set up /////////////////////
+////////////////////////////////////////////////////////////
 var windowWidth = (0, _jquery.default)(window).width();
 var windowHeight = (0, _jquery.default)(window).height();
 var parentWidth = (0, _jquery.default)("#viz").parent().width();
@@ -48136,21 +48139,30 @@ if (windowWidth <= 1300 && windowWidth > 1100) {
   imgWidth = 60;
   imgIncrease = 50;
   screenSize = "small";
-} //SVG container
+} ////////////////////////////////////////////////////////////
+//////////////////// SVG & G set up ////////////////////////
+////////////////////////////////////////////////////////////
 
 
 var svg = d3.select("#viz").append("svg").attr("id", "svg").attr("width", width).attr("height", height);
 var g = svg.append("g").attr("transform", "translate(".concat(width / 2, ", ").concat(height / 2, ")")); //-100 to reduce the distance between the top of the viz and the buttons
 
 var circleG = g.append("g").attr("id", "circleG");
-var mangoNameG = g.append("g").attr("id", "mangoNameG");
+var mangoNameG = g.append("g").attr("id", "mangoNameG"); ////////////////////////////////////////////////////////////
+///////////////// Other general variable ///////////////////
+////////////////////////////////////////////////////////////
+
 var mode = 'sweet';
-var PI05 = Math.PI / 2;
+var PI05 = Math.PI / 2; //To calculate circle radius
+
 var circle_radius = screenSize == "medium" || screenSize == "small" ? width * 0.38 : width * 0.3;
 var arc_radius = screenSize == "medium" || screenSize == "small" ? width * 0.44 : width * 0.36;
 var label_radius = screenSize == "medium" || screenSize == "small" ? width * 0.48 : width * 0.4;
 var line_radius1 = screenSize == "medium" || screenSize == "small" ? width * 0.46 : width * 0.38;
-var line_radius2 = screenSize == "medium" || screenSize == "small" ? width * 0.5 : width * 0.43; //function to wrap text
+var line_radius2 = screenSize == "medium" || screenSize == "small" ? width * 0.5 : width * 0.43; ////////////////////////////////////////////////////////////
+///////////////// A couple of functions ////////////////////
+////////////////////////////////////////////////////////////
+//function to wrap text
 
 var wrap = function wrap(text, width) {
   text.each(function () {
@@ -48205,7 +48217,21 @@ var calculatePath = function calculatePath(startAngle2, endAngle2) {
       xt = rad * Math.cos(endAngle2 - PI05),
       yt = rad * Math.sin(endAngle2 - PI05);
   return "M" + xs + "," + ys + " A" + rad + "," + rad + " 0 0 1 " + xt + "," + yt;
-}; //DATA CLEANING
+}; // function to append middle texts
+
+
+var appendCenterText = function appendCenterText(id) {
+  circleG.append("text").attr("class", "middleText").attr("text-anchor", "middle").attr("id", id).attr("x", 0).attr("fill", "#985B39").style("opacity", 0).text("");
+
+  if (id === "text1") {
+    circleG.select("#".concat(id)).attr("fill", "black").attr("font-weight", 700).attr("font-size", function () {
+      if (screenSize === "small" || screenSize === "medium") return 14;
+      return 20;
+    });
+  }
+}; ////////////////////////////////////////////////////////////
+////////////////// Clean & prepare data ////////////////////
+////////////////////////////////////////////////////////////
 
 
 var root = d3.stratify().id(function (d) {
@@ -48220,7 +48246,10 @@ mangoData.forEach(function (d, i) {
 });
 var mango_angle_distance = mangoData[1].centerAngle - mangoData[0].centerAngle; // for 23 mangoes
 
-mangoData = addAttributes(mangoData); // join the mango images
+mangoData = addAttributes(mangoData); ////////////////////////////////////////////////////////////
+/////////////////// Draw SVG elements //////////////////////
+////////////////////////////////////////////////////////////
+// join the mango images
 
 circleG.selectAll("image.mango").data(mangoData).join("svg:image").attr("class", "mango").attr("x", function (d) {
   return d.x - imgWidth / 2;
@@ -48234,15 +48263,12 @@ circleG.selectAll("image.mango").data(mangoData).join("svg:image").attr("class",
   mangoClicked(rearrageMangoData(d.data)[0], rearrageMangoData(d.data)[1]);
 }).transition().delay(function (d, i) {
   return 50 * i;
-}).duration(1000).attr("opacity", 1); //center text
+}).duration(1000).attr("opacity", 1); //add text in middle
 
-circleG.append("text").attr("class", "middleText").attr("text-anchor", "middle").attr("id", "text1").attr("x", 0).attr("fill", "black").attr("font-size", function () {
-  if (screenSize === "small" || screenSize === "medium") return 14;
-  return 20;
-}).attr("font-weight", 700).text("");
-circleG.append("text").attr("class", "middleText").attr("text-anchor", "middle").attr("id", "text2").attr("x", 0).attr("fill", "#985B39").style("opacity", 0).text("");
-circleG.append("text").attr("class", "middleText").attr("text-anchor", "middle").attr("id", "text3").attr("x", 0).attr("fill", "#985B39").style("opacity", 0).text("");
-circleG.append("text").attr("class", "middleText").attr("text-anchor", "middle").attr("id", "text4").attr("x", 0).attr("fill", "#985B39").style("opacity", 0).text(""); //Label line, arc & text
+appendCenterText("text1");
+appendCenterText("text2");
+appendCenterText("text3");
+appendCenterText("text4"); //Label line, arc & text
 
 mangoNameG.append("line").attr("class", "labelLine").attr("x1", line_radius1 * Math.cos(centerAdjustment * Math.PI / 180 - mango_angle_distance / 2 - PI05)).attr("y1", line_radius1 * Math.sin(centerAdjustment * Math.PI / 180 - mango_angle_distance / 2 - PI05)).attr("x2", line_radius2 * Math.cos(centerAdjustment * Math.PI / 180 - mango_angle_distance / 2 - PI05)).attr("y2", line_radius2 * Math.sin(centerAdjustment * Math.PI / 180 - mango_angle_distance / 2 - PI05)).style("stroke-width", "1px").attr("stroke", "#985B39");
 mangoNameG.append("path").attr("class", "labelArc").attr("id", "labelArc").style("stroke-width", "0px").style("fill", "none").attr("d", function (d, i) {
@@ -48272,7 +48298,9 @@ mangoNameG.selectAll(".mangoText").data(mangoData).join("text").attr("class", "m
   return "#mango_" + i;
 }).text(function (d) {
   return d.data.name_en;
-});
+}); ////////////////////////////////////////////////////////////
+//////////////////// More functions ////////////////////////
+////////////////////////////////////////////////////////////
 
 var sortMangoByAttribute = function sortMangoByAttribute() {
   var sortedByAttr; //sort root baed on attribute
@@ -48469,7 +48497,10 @@ var mangoClicked = function mangoClicked(dataFiltered, data) {
     if (screenSize === "small") return "";
     return d.data.feature_en;
   }).call(wrap, windowWidth <= 992 ? 150 : 250);
-};
+}; ////////////////////////////////////////////////////////////
+///////////// Click events to sort mangooes ////////////////
+////////////////////////////////////////////////////////////
+
 
 (0, _jquery.default)('#size').on('click', function () {
   mode = 'size';
@@ -48513,7 +48544,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59231" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59881" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

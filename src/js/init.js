@@ -142,8 +142,8 @@ const calculatePath = (startAngle2,endAngle2) =>{
 }
 
 // function to append middle texts
-const appendText = (id) => {
-    
+const appendCenterText = (id) => {
+
     circleG.append("text")
         .attr("class", "middleText")
         .attr("text-anchor", "middle")
@@ -152,7 +152,17 @@ const appendText = (id) => {
         .attr("fill", "#985B39")
         .style("opacity", 0)
         .text("");
-    
+
+        if(id==="text1"){
+            circleG.select(`#${id}`)
+                .attr("fill", "black")
+                .attr("font-weight",700)
+                .attr("font-size", function () {
+                    if (screenSize === "small" || screenSize === "medium") return 14
+                    return 20
+                });
+        }
+
 }
 
 ////////////////////////////////////////////////////////////
@@ -203,22 +213,10 @@ circleG.selectAll("image.mango")
     .attr("opacity", 1)
 
 //add text in middle
-circleG.append("text")
-    .attr("class", "middleText")
-    .attr("text-anchor", "middle")
-    .attr("id", "text1")
-    .attr("x", 0)
-    .attr("fill", "black")
-    .attr("font-size", function () {
-        if (screenSize === "small" || screenSize === "medium") return 14
-        return 20
-    })
-    .attr("font-weight", 700)
-    .text("");
-
-appendText("text2");
-appendText("text3");
-appendText("text4");
+appendCenterText("text1");
+appendCenterText("text2");
+appendCenterText("text3");
+appendCenterText("text4");
 
 //Label line, arc & text
 mangoNameG.append("line")
