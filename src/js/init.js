@@ -7,7 +7,6 @@ import images from "../img/*.png";
 ///////////////// Size & mobile set up /////////////////////
 ////////////////////////////////////////////////////////////
 
-
 const windowWidth = $(window).width();
 const windowHeight = $(window).height();
 const parentWidth = $("#viz").parent().width();
@@ -147,7 +146,6 @@ const calculatePath = (startAngle2,endAngle2) =>{
 ////////////////// Clean & prepare data ////////////////////
 ////////////////////////////////////////////////////////////
 
-
 const root = d3.stratify()
     .id(d => d.name)
     .parentId(d => d.parent)
@@ -242,7 +240,6 @@ mangoNameG.append("line")
     .style("stroke-width", "1px")
     .attr("stroke", "#985B39")
 
-
 mangoNameG.append("path")
     .attr("class", "labelArc")
     .attr("id", "labelArc")
@@ -284,7 +281,6 @@ mangoNameG.selectAll(".mangoArc")
     .style("fill", "none")
     .attr("d", d => calculatePath(d.startAngle2, d.endAngle2));
 
-
 mangoNameG.selectAll(".mangoText")
     .data(mangoData)
     .join("text")
@@ -324,7 +320,6 @@ const sortMangoByAttribute = () => {
     return addAttributes(mangoDataSorted);
 }
 
-
 const drawSortedMangoes = (data) => {
 
     circleG.selectAll("#text1,#text2,#text3,#text4")
@@ -344,7 +339,6 @@ const drawSortedMangoes = (data) => {
         .attr("height", imgWidth)
         .attr("xlink:href", d =>`${images[d.data.name]}`)
 
-
     mangoNameG.selectAll(".mangoArc")
         .data(data)
         .join(
@@ -360,7 +354,6 @@ const drawSortedMangoes = (data) => {
         .delay((d, i) => 50 * i)
         .duration(1000)
         .attr("d", d => calculatePath(d.startAngle2, d.endAngle2))
-
 
     mangoNameG.selectAll(".mangoText")
         .data(data)
@@ -447,7 +440,6 @@ const rearrageMangoData = (data) => {
     return [filteredData, filteredData.concat(selectedData)];
 }
 
-
 const mangoClicked = (dataFiltered, data) => {
 
     const selected = data.filter(d => d.cluster === 22);
@@ -478,7 +470,6 @@ const mangoClicked = (dataFiltered, data) => {
         .delay((d, i) => 20 * i)
         .duration(1000)
         .attr("d", d => calculatePath(d.startAngle2, d.endAngle2));
-
 
     d3.selectAll(".mangoText")
         .data(dataFiltered)
