@@ -3,6 +3,10 @@ import * as d3 from "d3";
 import $ from "jquery";
 import images from "../img/*.png";
 
+////////////////////////////////////////////////////////////
+///////////////// Size & mobile set up /////////////////////
+////////////////////////////////////////////////////////////
+
 
 const windowWidth = $(window).width();
 const windowHeight = $(window).height();
@@ -14,7 +18,6 @@ $(window).resize(function () {
         return;
     }
 });
-
 
 const width = parentWidth >= 1000 ? 1000 : parentWidth;
 const height = width;
@@ -49,7 +52,10 @@ if (windowWidth <= 1300 && windowWidth > 1100) {
     screenSize = "small";
 }
 
-//SVG container
+////////////////////////////////////////////////////////////
+//////////////////// SVG & G set up ////////////////////////
+////////////////////////////////////////////////////////////
+
 const svg = d3.select("#viz")
     .append("svg")
     .attr("id", "svg")
@@ -59,20 +65,31 @@ const svg = d3.select("#viz")
 const g = svg.append("g")
     .attr("transform", `translate(${width / 2}, ${height / 2})`);
     //-100 to reduce the distance between the top of the viz and the buttons
+
 const circleG = g.append("g")
     .attr("id", "circleG");
 
 const mangoNameG = g.append("g")
     .attr("id", "mangoNameG");
 
-let mode = 'sweet';
+////////////////////////////////////////////////////////////
+///////////////// Other general variable ///////////////////
+////////////////////////////////////////////////////////////
 
+let mode = 'sweet';
 const PI05 = Math.PI / 2;
+
+//To calculate circle radius
 const circle_radius = screenSize == "medium" || screenSize == "small"? width * 0.38:width * 0.3;
 const arc_radius = screenSize == "medium" || screenSize == "small"? width*0.44:width * 0.36;
 const label_radius = screenSize == "medium" || screenSize == "small"? width * 0.48:width * 0.4;
 const line_radius1 = screenSize == "medium" || screenSize == "small"? width * 0.46:width * 0.38;
 const line_radius2 = screenSize == "medium" || screenSize == "small"? width * 0.5:width * 0.43;
+
+
+////////////////////////////////////////////////////////////
+///////////////// A couple of functions ////////////////////
+////////////////////////////////////////////////////////////
 
 //function to wrap text
 const wrap = (text, width) => {
@@ -125,7 +142,11 @@ const calculatePath = (startAngle2,endAngle2) =>{
     return "M" + xs + "," + ys + " A" + rad + "," + rad + " 0 0 1 " + xt + "," + yt;
 }
 
-//DATA CLEANING
+
+////////////////////////////////////////////////////////////
+////////////////// Clean & prepare data ////////////////////
+////////////////////////////////////////////////////////////
+
 
 const root = d3.stratify()
     .id(d => d.name)
@@ -143,6 +164,10 @@ mangoData.forEach(function (d, i) {
 const mango_angle_distance = mangoData[1].centerAngle - mangoData[0].centerAngle; // for 23 mangoes
 
 mangoData = addAttributes(mangoData);
+
+////////////////////////////////////////////////////////////
+/////////////////// Draw SVG elements //////////////////////
+////////////////////////////////////////////////////////////
 
 // join the mango images
 circleG.selectAll("image.mango")
@@ -276,6 +301,10 @@ mangoNameG.selectAll(".mangoText")
     .attr("xlink:href", (d, i) => "#mango_" + i)
     .text(d => d.data.name_en);
 
+
+////////////////////////////////////////////////////////////
+//////////////////// More functions ////////////////////////
+////////////////////////////////////////////////////////////
 
 const sortMangoByAttribute = () => {
 
@@ -522,6 +551,10 @@ const mangoClicked = (dataFiltered, data) => {
         })
         .call(wrap, windowWidth <= 992 ? 150 : 250);
 }
+
+////////////////////////////////////////////////////////////
+///////////// Click events to sort mangooes ////////////////
+////////////////////////////////////////////////////////////
 
 $('#size').on('click', function () {
     mode = 'size';
