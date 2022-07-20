@@ -332,7 +332,8 @@ const drawSortedMangoes = (data) => {
         .duration(1000)
         .attr("d", d => calculatePath(d.startAngle2, d.endAngle2))
 
-        mangoNameG.selectAll(".mangoText")
+
+    mangoNameG.selectAll(".mangoText")
         .data(data)
         .join(
             enter => enter.append("text")
@@ -537,3 +538,4 @@ $('#sweetness').on('click', function () {
     $("#size").removeClass("active");
     drawSortedMangoes(mangoDataSweetness);
 });
+
