@@ -276,7 +276,11 @@ mangoNameG.selectAll(".mangoText")
     .append("textPath")
     .attr("startOffset", "50%")
     .style("text-anchor", "middle")
-    .style("font-size", 14)
+        .style("font-size", function () {
+        if (screenSize === "medium") return 12
+        if (screenSize === "small") return 7
+        return 14
+    })
     .style("font-weight", 400)
     .attr("xlink:href", (d, i) => "#mango_" + i)
     .text(d => d.data.name_en);
