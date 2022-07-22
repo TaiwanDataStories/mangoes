@@ -181,7 +181,9 @@ let mangoData = cluster(root).leaves();
 mangoData.forEach(function (d, i) {
     d.centerAngle = (d.x - centerAdjustment) * Math.PI / 180;
 });
+
 const mango_angle_distance = mangoData[1].centerAngle - mangoData[0].centerAngle; // for 23 mangoes
+
 mangoData = addAttributes(mangoData);
 
 ////////////////////////////////////////////////////////////
