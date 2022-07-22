@@ -179,7 +179,8 @@ const cluster = d3.cluster().size([360, null]);
 let mangoData = cluster(root).leaves();
 
 mangoData.forEach(function (d, i) {
-    d.centerAngle = (d.x - centerAdjustment) * Math.PI / 180; //-centerAdjustment so it starts at the center at top...basically centerAngle is just x converted from 360 to radians
+    d.centerAngle = (d.x - centerAdjustment) * Math.PI / 180; 
+    //-centerAdjustment so it starts at the center at top...basically centerAngle is just x converted from 360 to radians
 });
 
 const mango_angle_distance = mangoData[1].centerAngle - mangoData[0].centerAngle; // for 23 mangoes
