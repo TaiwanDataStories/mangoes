@@ -356,11 +356,7 @@ const drawSortedMangoes = (data) => {
         .attr("startOffset", "50%")
         .style("text-anchor", "middle")
         .style("font-weight", 400)
-        .style("font-size", function () {
-            if (screenSize === "medium") return 12
-            if (screenSize === "small") return 7
-            return 14
-        })
+        .style("font-size", 14)
         .transition()
         .delay((d, i) => 50 * i)
         .duration(1000)
