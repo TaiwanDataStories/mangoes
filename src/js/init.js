@@ -382,19 +382,8 @@ const rearrageMangoData = (data) => {
     } //this is to prevent redrawing, for example, if the current order is sort by size instead of sweetness,
     // when the user clicks on a mango it won't sort it by sweetness before moving the mango to the middle
 
-    //before cluster,the children's includes the following attributes...
-    // data: {parent: 'All', name: '夏雪', name_en: 'XiaXue' ...}
-    // depth: 1
-    // height: 0
-    // id: "夏雪"
-
     cluster(rootSorted);
-
-    //after cluster, the children's also has parent, x & y
-    // parent: pd {data: {…}, height: 1, depth: 0, parent: null, id: 'All'...}
-    // x: 8.181818181818182
-    // y: 0
-
+    
     let filteredData = rootSorted.children.filter(d => d.data.name !== data.name);
     const selectedData = root.children.filter(d => d.data.name === data.name);
 
@@ -410,17 +399,7 @@ const rearrageMangoData = (data) => {
 
     const mango_angle_distance = filteredData[1].centerAngle - filteredData[0].centerAngle;
     filteredData =  addAttributes(filteredData,mango_angle_distance);
-
-    //after the above step, the children includes also the following attributes, with x and y updated:
-    // centerAngle: 0.27369935997183803
-    // cluster: 0
-    // endAngle: 0.4164990260441014
-    // endAngle2: 0.39269908169872414
-    // startAngle: 0.13089969389957468
-    // startAngle2: 0.1546996382449519
-    // x: 72.97963350023863
-    // y: -259.94994343944535
-
+    
     return [filteredData, filteredData.concat(selectedData)];
 }
 
