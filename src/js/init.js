@@ -469,6 +469,61 @@ const mangoClicked = (dataFiltered, data) => {
         .attr("xlink:href", (d, i) => "#mango_" + i)
         .style("opacity", 1)
         .text(d => d.data.name_en);
+    
+     // Update the text in the middle
+    circleG.select("#text1")
+        .datum(selected[0])
+        .transition().duration(500)
+        .attr("x", d => d.x)
+        .attr("y", d => d.y + imgIncrease - 20 + 2 * d.data.size_cm)
+        .style("opacity", 1)
+        .text(d => d.data.name_en);
+
+    circleG.select("#text2")
+        .datum(selected[0])
+        .transition().duration(500)
+        .attr("x", d => d.x)
+        .attr("y", d => d.y + imgIncrease - 20 + 2 * d.data.size_cm + 30)
+        .style("font-size", function () {
+            if (screenSize === "small") return 10
+            return 16
+        })
+        .style("opacity", 1)
+        .text(function (d) {
+            if (screenSize === "small") return ""
+            return `Size: ${d.data.size_cm} cm`
+        });
+
+    circleG.select("#text3")
+        .datum(selected[0])
+        .transition().duration(500)
+        .attr("x", d => d.x)
+        .attr("y", d => d.y + imgIncrease - 20 + 2 * d.data.size_cm + 50)
+        .style("font-size", function () {
+            if (screenSize === "small") return 10
+            return 16
+        })
+        .style("opacity", 1)
+        .text(function (d) {
+            if (screenSize === "small") return ""
+            return `Sweetness: ${d.data.sweetness_brix} °Bx`
+        });
+
+    circleG.select("#text4")
+        .datum(selected[0])
+        .attr("x", d => d.x)
+        .attr("y", d => d.y + imgIncrease - 20 + 2 * d.data.size_cm + 56)
+        .attr("dy", 1)
+        .style("font-size", function () {
+            if (screenSize === "small") return 10
+            return 16
+        })
+        .style("opacity", windowWidth <= 992 ? 0 : 1)
+        .text(function (d) {
+            if (screenSize === "small") return ""
+            return d.data.feature_en
+        })
+        .call(wrap, windowWidth <= 992 ? 150 : 250);
 }
 
 ////////////////////////////////////////////////////////////
